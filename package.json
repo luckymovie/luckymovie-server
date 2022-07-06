@@ -1,0 +1,11 @@
+{
+  "name": "lucky-movie-server",
+  "version": "0.1.0",
+  "description": "lucky-movie-server",
+  "main": "server.js",
+  "scripts": {
+    "test": "run startDev"
+  },
+  "author": "",
+  "license": "ISC"
+}
