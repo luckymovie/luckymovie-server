@@ -5,10 +5,10 @@ Router.get("/", (_req, res) => {
     message: "This is Lucky Movie API",
   });
 });
-Router.use("/auth");
-Router.use("/user");
-Router.use("/movies");
-Router.use("/transaction");
+// Router.use("/auth");
+// Router.use("/user");
+// Router.use("/movies");
+// Router.use("/transaction");
 Router.get("*", (_req, res) => {
   res.status(404).json({
     message: "Api Not Found",
