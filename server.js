@@ -5,10 +5,12 @@ const cors = require("cors");
 
 const mainRouter = require("./src/routes/index");
 const { dbConn } = require("./src/config/db");
+const { redisConn } = require("./src/config/redis");
 
-const cloudinaryConfig = require("./src/config/cloudinary");
+const { cloudConfig } = require("./src/config/cloudinary");
 
 dbConn();
+redisConn();
 const app = express();
 const PORT = process.env.PORT;
 
@@ -29,7 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("*", cloudinaryConfig);
+app.use("*", cloudConfig);
 
 app.use(mainRouter);
 
