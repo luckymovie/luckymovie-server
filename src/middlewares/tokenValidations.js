@@ -25,8 +25,9 @@ const checkResetToken = (req, res, next) => {
 
 const checkToken = (req, res, next) => {
     const bearerToken = req.header("x-access-token");
+    console.log(bearerToken)
     const token = bearerToken.split(" ")[1];
-    
+    console.log(token)
     if(!bearerToken){
         return errorResponse(res, 401, {msg: "Sign in needed"});
     }
