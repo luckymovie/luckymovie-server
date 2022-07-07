@@ -25,7 +25,7 @@ const updateMyProfile = (req, res) => {
     }
     updateUser(req.body, req.userPayload, picture)
     .then(({data, message}) => {
-        successResponse(res, 200, {msg: message})
+        successResponse(res, 200, {msg: message, data})
     })
     .catch(({error, status}) => {
         errorResponse(res, status, error)
