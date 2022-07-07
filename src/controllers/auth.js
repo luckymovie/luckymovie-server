@@ -11,6 +11,8 @@ const handlebars = require("handlebars");
 const fs = require("fs");
 const { promisify } = require("util");
 const readFile = promisify(fs.readFile);
+const {client} = require('../config/redis')
+
 
 const register = (req, res) => {
   const { email, password } = req.body;
@@ -203,4 +205,17 @@ const resetPassword = (req, res) => {
       errorResponse(res, status, err);
     });
 };
-module.exports = { register, signIn, forgotPassword, resetPassword };
+
+const signOut = async (req, res) => {
+    try {
+      const cachedLogin = await client.get(`jwt${req.userPayload.id}`);
+      if (cachedLogin) {
+        await client.del(`jwt${req.userPayload.id}`);
+      }
+      successResponse(res, 200, { message: "You have successfully logged out" }, null);
+    } catch (err) {
+      errorResponse(res, 500, err.message);
+    }
+  };
+  
+module.exports = { register, signIn, forgotPassword, resetPassword,signOut};
