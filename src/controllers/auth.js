@@ -1,6 +1,7 @@
 const { successResponse, errorResponse } = require("../helpers/response");
-const { registerNewUSer } = require("../models/auth");
+const { registerNewUSer, getPassword } = require("../models/auth");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const register = (req, res) => {
     const {email, password} = req.body;
@@ -21,4 +22,41 @@ const register = (req, res) => {
     });
 };
 
-module.exports = {register};
+const signIn = (req, res) => {
+    //Get body (email and password)
+    const {email, password} = req.body;
+
+    //Match email and password
+    getPassword(email)
+    .then((result) => {
+        const id = result.id;
+        const role = result.role_id
+        bcrypt.compare(password, result.password)
+        .then((result) => {
+            if(!result){
+                return errorResponse(res, 400, {msg: "Email or password is incorrect"});
+            }
+            //Generate JWT
+            const userPayload = {
+                email,
+                id,
+                role
+
+            };
+            const jwtOptions = {
+                issuer: process.env.JWT_ISSUER,
+                expiresIn: "300000s"
+            };
+            const token = jwt.sign(userPayload, process.env.JWT_KEY, jwtOptions);
+            successResponse(res, 200, {email, token, role}, null);
+        })
+        .catch((status, err) => {
+            errorResponse(res, status, err);
+        });
+    })
+    .catch(({status, err}) => {
+        errorResponse(res, status, err);
+    });
+    
+};
+module.exports = { register, signIn};

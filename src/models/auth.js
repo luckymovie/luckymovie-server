@@ -37,7 +37,24 @@ const getEmail = (email) => {
     
 };
 
+const getPassword = (email) => {
+    return new Promise ((resolve, reject) => {
+        const sqlQuery = "select password, id, role_id from public.users where email = $1";
+        db.query(sqlQuery, [email])
+        .then((result) => {
+            if(result.rowCount === 0){
+                return reject({status: 400, err: {msg: "Email or password is incorrect"}});
+            }
+            return resolve(result.rows[0]);
+        })
+        .catch((err) => {
+            reject({status: 500, err});
+        });
+    });
+};
+
 module.exports = {
     registerNewUSer,
-    getEmail
+    getEmail,
+    getPassword
 };
