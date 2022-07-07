@@ -45,7 +45,7 @@ Lucky Movie is an ticketing system for movie cinemas .
 1. Clone the repo
 
 ```sh
-$ git clone https://github.com/zilgya/zilgya-server.git
+$ git clone https://github.com/luckymovie/luckymovie-server.git
 ```
 
 2. Install NPM packages
