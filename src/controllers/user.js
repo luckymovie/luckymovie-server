@@ -1,4 +1,4 @@
-const { getUser } = require("../models/user");
+const { getUser, updateUser } = require("../models/user");
 const {errorResponse, successResponse, searchResponse} = require("../helpers/response");
 
 const getMyProfile = (req, res) => {
@@ -11,6 +11,21 @@ const getMyProfile = (req, res) => {
     });
 };
 
+const updateMyProfile = (req, res) => {
+    const {file = null} = req;
+    let picture;
+    if(file){
+        picture = req.file.path;
+    }
+    updateUser(req.body, req.userPayload, picture)
+    .then(({data, message}) => {
+        successResponse(res, 200, {msg: message})
+    })
+    .catch(({error, status}) => {
+        errorResponse(res, status, error)
+    });
+};
+
 module.exports = {
-    getMyProfile
+    getMyProfile, updateMyProfile
 };
