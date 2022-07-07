@@ -40,6 +40,25 @@ const checkUpdateForm = [
     },
 ];
 
+const updatePasswordForm = [
+    body("password")
+        .isLength({ min: 8 })
+        .withMessage("Password must be at least 8 characters")
+        .matches(/\d/)
+        .withMessage("Password must contain a number")
+];
+
+const checkUpdatePasswordForm = [
+    updatePasswordForm,
+    (req, res, next) => {
+      const error = validationResult(req);
+      if (!error.isEmpty()) {
+        return errorResponse(res, 400, {msg: error.array()})
+      }
+      next();
+    },
+];
 module.exports = {
-    checkUpdateForm
+    checkUpdateForm,
+    checkUpdatePasswordForm
 };
