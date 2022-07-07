@@ -13,12 +13,14 @@ Router.post("/new", authValidation.checkRegisterForm, authValidation.checkRegist
 Router.post("/", authValidation.checkSigInForm, authController.signIn);
 
 // //Sign Out
-// Router.delete("/signout", authController.signout);
+Router.delete("/signout",tokenValidation.checkToken, authController.signOut);
 
 // Forgot Password
 Router.post("/forgot", authValidation.checkForgotForm, authValidation.checkEmail, authController.forgotPassword);
 
 // Reset Password
 Router.patch("/reset/:token", authValidation.checkResetForm, tokenValidation.checkResetToken, authController.resetPassword);
+
+
 
 module.exports = Router;
