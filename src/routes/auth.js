@@ -6,10 +6,10 @@ const authValidation = require("../middlewares/authValidations");
 // const validate = require("../middleware/userValidation");
 
 //Register
-Router.post("/new", authValidation.checkForm, authValidation.checkRegistedEmail, authController.register);
+Router.post("/new", authValidation.checkRegisterForm, authValidation.checkRegistedEmail, authController.register);
 
 // //Sign In
-// Router.post("/", authController.signIn);
+Router.post("/", authValidation.checkSigInForm, authController.signIn);
 
 // //Sign Out
 // Router.delete("/signout", authController.signout);
