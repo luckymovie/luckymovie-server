@@ -121,12 +121,36 @@ const forgotPassword = async (req, res) => {
 };
 
 const resetPassword = (req, res) => {
-    const {id} = req.userPayload
+    const {id, email} = req.userPayload
     const {newPassword} = req.body
     bcrypt.hash(newPassword, 10)
     .then((hashedPassword) => {
         updatePassword(id, hashedPassword)
-        .then(({message}) =>{
+        .then(async({message}) =>{
+
+            const transporter = nodemailer.createTransport({
+                service : process.env.SERVICE,
+                auth : {
+                    type: "OAuth2",
+                    user: process.env.MAIL_USERNAME,
+                    pass: process.env.MAIL_PASSWORD,
+                    clientId: process.env.OAUTH_CLIENTID,
+                    clientSecret: process.env.OAUTH_CLIENT_SECRET,
+                    refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+                }   
+            })
+
+            let html = await readFile('./src/controllers/templates/reset.html', 'utf8');
+            let template = handlebars.compile(html);
+            let htmlToSend = template();
+
+            await transporter.sendMail({
+                from : process.env.USER,
+                to : email,
+                subject : `Lucky Movie - Successfully Reset Password`,
+                html: htmlToSend
+            })
+
             successResponse(res, 200, {msg: message})
         })
         .catch(({status, error}) => {
