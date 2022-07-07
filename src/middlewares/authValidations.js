@@ -28,7 +28,7 @@ const register = [
         .withMessage("Password must contain a number")
 ];
 
-const checkForm = [
+const checkRegisterForm = [
     register,
     (req, res, next) => {
       const error = validationResult(req);
@@ -39,6 +39,27 @@ const checkForm = [
     },
 ];
 
+const signIn = [
+    body("email")
+        .isEmail()
+        .withMessage("Please enter a valid email address")
+        .normalizeEmail(),
+    body("password")
+        .isLength({ min: 8 })
+        .withMessage("Please enter a valid password")
+];
+
+const checkSigInForm = [
+    signIn,
+    (req, res, next) => {
+      const error = validationResult(req);
+      if (!error.isEmpty()) {
+        return errorResponse(res, 400, {msg: error.array()})
+      }
+      next();
+    },
+];
+
 module.exports = {
-    checkRegistedEmail, checkForm
+    checkRegistedEmail, checkRegisterForm, checkSigInForm
 };
