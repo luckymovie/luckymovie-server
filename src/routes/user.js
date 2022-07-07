@@ -9,6 +9,9 @@ const validate = require("../middlewares/userValidation");
 Router.get("/", tokenValidation.checkToken, userController.getMyProfile);
 
 //Update Profile
-Router.patch("/", tokenValidation.checkToken, uploadFile, validate.checkUpdateForm, userController.updateMyProfile);
+Router.patch("/update/profile", tokenValidation.checkToken, uploadFile, validate.checkUpdateForm, userController.updateMyProfile);
+
+//Update Password
+Router.patch("/update/password", tokenValidation.checkToken, validate.checkUpdatePasswordForm, userController.updateMyPassword);
 
 module.exports = Router;
