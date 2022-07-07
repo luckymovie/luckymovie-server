@@ -22,6 +22,27 @@ const checkResetToken = (req, res, next) => {
     });
 }; 
 
+const checkToken = (req, res, next) => {
+    const bearerToken = req.header("x-access-token");
+    const token = bearerToken.split(" ")[1];
+    
+    if(!bearerToken){
+        return errorResponse(res, 401, {msg: "Sign in needed"});
+    }
+    //Token Verification
+    jwt.verify(token, process.env.JWT_KEY, {issuer: process.env.JWT_ISSUER}, (err, payload) => {
+        if(err && err.name === "TokenExpiredError"){
+            return errorResponse(res, 401, {msg: "Please sign in again"});
+        }
+        if(err){
+            return errorResponse(res, 401, {msg: "Access denied"});
+        }
+        req.userPayload = payload;
+        
+        next();
+    });
+};
+
 module.exports = {
-    checkResetToken
+    checkResetToken, checkToken
 };
