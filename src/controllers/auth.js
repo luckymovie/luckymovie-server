@@ -7,7 +7,7 @@ const handlebars = require('handlebars');
 const fs = require('fs');
 const { promisify } = require('util');
 const readFile = promisify(fs.readFile);
-
+const {client} = require('../config/redis')
 
 
 const register = (req, res) => {
@@ -38,7 +38,7 @@ const signIn = (req, res) => {
         const id = result.id;
         const role = result.role_id
         bcrypt.compare(password, result.password)
-        .then((result) => {
+        .then(async(result) => {
             if(!result){
                 return errorResponse(res, 400, {msg: "Email or password is incorrect"});
             }
@@ -54,6 +54,7 @@ const signIn = (req, res) => {
                 expiresIn: "300000s"
             };
             const token = jwt.sign(userPayload, process.env.JWT_KEY, jwtOptions);
+            await client.set(`jwt${id}`,token)
             successResponse(res, 200, {email, token, role}, null);
         })
         .catch((status, err) => {
@@ -161,4 +162,17 @@ const resetPassword = (req, res) => {
         errorResponse(res, status, err);
     });
 };
-module.exports = { register, signIn, forgotPassword, resetPassword};
+
+const signOut = async (req, res) => {
+    try {
+      const cachedLogin = await client.get(`jwt${req.userPayload.id}`);
+      if (cachedLogin) {
+        await client.del(`jwt${req.userPayload.id}`);
+      }
+      successResponse(res, 200, { message: "You have successfully logged out" }, null);
+    } catch (err) {
+      errorResponse(res, 500, err.message);
+    }
+  };
+  
+module.exports = { register, signIn, forgotPassword, resetPassword,signOut};
