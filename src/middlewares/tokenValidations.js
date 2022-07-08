@@ -3,8 +3,8 @@ const jwt = require("jsonwebtoken");
 const { client } = require("../config/redis");
 
 const checkResetToken = (req, res, next) => {
-    const token = req.header("x-access-token");
- 
+    const {token} = req.params;
+
     
     if(!token){
         return errorResponse(res, 401, {msg: "Sign in needed"});
