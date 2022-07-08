@@ -1,9 +1,5 @@
 const { successResponse, errorResponse } = require("../helpers/response");
-const {
-  registerNewUSer,
-  getPassword,
-  updatePassword,
-} = require("../models/auth");
+const { registerNewUSer, getPassword, updatePassword, activateAccount } = require("../models/auth");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
@@ -20,22 +16,129 @@ const register = (req, res) => {
     .hash(password, 10)
     .then((hashedPassword) => {
       registerNewUSer(email, hashedPassword)
-        .then(() => {
-          successResponse(
-            res,
-            201,
-            { msg: "User successfully registered" },
-            null
+      .then(async(result) => {
+        try {
+          const id = result.id;
+      
+          //Generate JWT
+          const userPayload = {
+            email,
+            id,
+          };
+          const jwtOptions = {
+            issuer: process.env.JWT_ISSUER,
+            expiresIn: "600s",
+          };
+          const token = jwt.sign(userPayload, process.env.JWT_KEY, jwtOptions);
+      
+          const transporter = nodemailer.createTransport({
+            service: process.env.SERVICE,
+            auth: {
+              type: "OAuth2",
+              user: process.env.MAIL_USERNAME,
+              pass: process.env.MAIL_PASSWORD,
+              clientId: process.env.OAUTH_CLIENTID,
+              clientSecret: process.env.OAUTH_CLIENT_SECRET,
+              refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+            },
+          });
+      
+          let html = await readFile(
+            "./src/controllers/templates/confirmation.html",
+            "utf8"
           );
-        })
-        .catch((err) => {
-          const { status, error } = err;
-          errorResponse(res, status, error);
-        });
+          let template = handlebars.compile(html);
+          let data = {
+            url: `${process.env.CLIENT_URL}confirmation/${token}`,
+          };
+          let htmlToSend = template(data);
+      
+          await transporter.sendMail({
+            from: process.env.USER,
+            to: email,
+            subject: `Lucky Movie - Activate Your Account`,
+            html: htmlToSend,
+          });
+
+          successResponse(res,201, { msg: "User successfully registered. Please check your email to activate your account." }, null);
+        } catch (error) {
+          errorResponse(res, 400, {
+            msg: "Email sending failed",
+          });
+        }
+      })
+      .catch((err) => {
+        const { status, error } = err;
+        errorResponse(res, status, error);
+      });
     })
     .catch(({ status, err }) => {
       errorResponse(res, status, err);
     });
+};
+
+const activation = (req, res) => {
+  const {id} = req.userActivation
+  activateAccount(id)
+  .then(({message, data}) => {
+    successResponse(res, 200, {message, data})
+  })
+  .catch(({error, status}) => {
+    errorResponse(res, status, error)
+  })
+}
+
+const resend = async (req, res) => {
+  try {
+    const email = req.body.email;
+    const id = req.id;
+
+    //Generate JWT
+    const userPayload = {
+      email,
+      id,
+    };
+    const jwtOptions = {
+      issuer: process.env.JWT_ISSUER,
+      expiresIn: "600s",
+    };
+    const token = jwt.sign(userPayload, process.env.JWT_KEY, jwtOptions);
+
+    const transporter = nodemailer.createTransport({
+      service: process.env.SERVICE,
+      auth: {
+        type: "OAuth2",
+        user: process.env.MAIL_USERNAME,
+        pass: process.env.MAIL_PASSWORD,
+        clientId: process.env.OAUTH_CLIENTID,
+        clientSecret: process.env.OAUTH_CLIENT_SECRET,
+        refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+      },
+    });
+
+    let html = await readFile(
+      "./src/controllers/templates/confirmation.html",
+      "utf8"
+    );
+    let template = handlebars.compile(html);
+    let data = {
+      url: `${process.env.CLIENT_URL}confirmation/${token}`,
+    };
+    let htmlToSend = template(data);
+
+    await transporter.sendMail({
+      from: process.env.USER,
+      to: email,
+      subject: `Lucky Movie - Activate Your Account`,
+      html: htmlToSend,
+    });
+
+    successResponse(res,201, { msg: "Email has been sent. Please check your email to activate your account." }, null);
+  } catch (error) {
+    errorResponse(res, 400, {
+      msg: "Email sending failed",
+    });
+  }
 };
 
 // const signIn = (req, res) => {
@@ -75,6 +178,7 @@ const register = (req, res) => {
 //     });
 
 // };
+
 const signIn = async (req, res) => {
   try {
     //Get body (email and password)
@@ -82,11 +186,19 @@ const signIn = async (req, res) => {
     const result = await getPassword(email);
     const id = result.id;
     const role = result.role_id;
+    const activated_at = result.activated_at
+    
     //Match email and password
     const verif = await bcrypt.compare(password, result.password);
     if (!verif) {
       return errorResponse(res, 400, { msg: "Email or password is incorrect" });
     }
+
+    //Is account activated?
+    if(!activated_at !== null){
+      return errorResponse(res, 400, { msg: "Please check your email to activate your account"})
+    }
+
     //Generate JWT
     const userPayload = {
       email,
@@ -105,6 +217,7 @@ const signIn = async (req, res) => {
     errorResponse(res, 500, error.message);
   }
 };
+
 const forgotPassword = async (req, res) => {
   try {
     const email = req.body.email;
@@ -151,8 +264,7 @@ const forgotPassword = async (req, res) => {
     });
 
     successResponse(res, 200, {
-      msg: "Email succesfully sent. Kindly check your email for further instructions.",
-      token,
+      msg: "Email succesfully sent. Kindly check your email for further instructions."
     });
   } catch (error) {
     errorResponse(res, 400, {
@@ -218,4 +330,4 @@ const signOut = async (req, res) => {
     }
   };
   
-module.exports = { register, signIn, forgotPassword, resetPassword,signOut};
+module.exports = { register, signIn, forgotPassword, resetPassword, signOut, activation, resend};
