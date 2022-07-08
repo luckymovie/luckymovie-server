@@ -78,9 +78,35 @@ const register = (req, res) => {
 };
 
 const activation = (req, res) => {
-  const {id} = req.userActivation
+  const {id, email} = req.userActivation
   activateAccount(id)
   .then(({message, data}) => {
+    const transporter = nodemailer.createTransport({
+      service: process.env.SERVICE,
+      auth: {
+        type: "OAuth2",
+        user: process.env.MAIL_USERNAME,
+        pass: process.env.MAIL_PASSWORD,
+        clientId: process.env.OAUTH_CLIENTID,
+        clientSecret: process.env.OAUTH_CLIENT_SECRET,
+        refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+      },
+    });
+
+    let html = await readFile(
+      "./src/controllers/templates/activationSuccess.html",
+      "utf8"
+    );
+    let template = handlebars.compile(html);
+    let htmlToSend = template();
+
+    await transporter.sendMail({
+      from: process.env.USER,
+      to: email,
+      subject: `Lucky Movie - Your Account Has Been Activated`,
+      html: htmlToSend,
+    });
+
     successResponse(res, 200, {message, data})
   })
   .catch(({error, status}) => {
