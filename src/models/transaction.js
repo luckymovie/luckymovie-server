@@ -11,8 +11,18 @@ const postTransaction = async (body, userId) => {
     const orderQuery = "INSERT INTO transactions(user_id,payment_method,quantity,total_price,screening_id,date,time) values($1,$2,$3,$4,$5,$6,$7) returning id";
     const order = await db.query(orderQuery, [userId, payment_method, ticket_qty, total_payment, screeningId, date, time]);
     const orderId = order.rows[0].id;
-    const ticketQuery = "INSERT INTO tickets(transaction_id,seat) values($1,$2) returning id";
-    await db.query(ticketQuery, [orderId, seats]);
+    let ticketQuery = "INSERT INTO tickets(transaction_id,seat) VALUES";
+    let tQueryParams = [];
+    let tParams = [];
+    seats.map((seat) => {
+      tQueryParams.push(`($${tParams.length + 1},$${tParams.length + 2})`, ",");
+      tParams.push(orderId, seat);
+    });
+    tQueryParams.pop();
+    ticketQuery += tQueryParams.join("");
+    ticketQuery += " RETURNING *";
+
+    await db.query(ticketQuery, tParams);
     return {
       data: {
         total_payment,
@@ -28,7 +38,7 @@ const postTransaction = async (body, userId) => {
 const getUserTicket = async (userId, transaction_id) => {
   try {
     const sqlQuery =
-      "select t.id as transaction_id , t2.seat as seat,title as movie,date as movie_date,time as time_date,quantity as count, total_price,t2.id as ticket_id from transactions t join screening s on s.id = t.screening_id join movies m on s.movie_id=m.id join cinemas c on s.cinema_id=c.id join tickets t2 on t2.transaction_id =t.id where user_id = $1 and transaction_id = $2 and status = 'PAID'";
+      "select t.id as transaction_id , t2.seat as seat,title as movie,date as movie_date,time as movie_time,quantity as count, total_price,t2.id as ticket_id from transactions t join screening s on s.id = t.screening_id join movies m on s.movie_id=m.id join cinemas c on s.cinema_id=c.id join tickets t2 on t2.transaction_id =t.id where user_id = $1 and transaction_id = $2 and status = 'PAID'";
     const result = await db.query(sqlQuery, [userId, transaction_id]);
     return {
       data: result.rows,
@@ -39,14 +49,41 @@ const getUserTicket = async (userId, transaction_id) => {
   }
 };
 
-const confirmPayment = async (body) => {
+const getUserHistory = async (userId) => {
   try {
+    const sqlQuery =
+      "select t.id as transaction_id , c.name as cinema, t2.seat as seat,title as movie,date as movie_date,time as movie_time,quantity as count, total_price,t2.id as ticket_id,ticket_status from transactions t join screening s on s.id = t.screening_id join movies m on s.movie_id=m.id join cinemas c on s.cinema_id=c.id join tickets t2 on t2.transaction_id =t.id where user_id = $1 and payment_status = 'PAID'";
+    const result = await db.query(sqlQuery, [userId]);
+    return {
+      data: result.rows,
+    };
+  } catch (error) {
+    const status = error.status || 500;
+    throw new ErrorHandler({ status, message: error.message });
+  }
+};
+
+const getAllHistory = async () => {
+  try {
+    const sqlQuery =
+      "select distinct on(t.id) t2.transaction_id,t.user_id as user_id, c.name as cinema, t2.seat as seat,title as movie,date as movie_date,time as movie_time,t.payment_status,payment_method,quantity as count, total_price,t2.id as ticket_id,ticket_status from transactions t join screening s on s.id = t.screening_id join movies m on s.movie_id=m.id join cinemas c on s.cinema_id=c.id join tickets t2 on t2.transaction_id =t.id ";
+    const result = await db.query(sqlQuery);
+    return {
+      data: result.rows,
+    };
+  } catch (error) {
+    const status = error.status || 500;
+    throw new ErrorHandler({ status, message: error.message });
+  }
+};
+
+const confirmPayment = async (response) => {
+  try {
+    const { body } = response;
     const statusResponse = await snap.transaction.notification(body);
     let orderId = statusResponse.order_id;
     let transactionStatus = statusResponse.transaction_status;
     let fraudStatus = statusResponse.fraud_status;
-
-    console.log(`Transaction notification received. Order ID: ${orderId}. Transaction status: ${transactionStatus}. Fraud status: ${fraudStatus}`);
 
     // Sample transactionStatus handling logic
 
@@ -55,13 +92,13 @@ const confirmPayment = async (body) => {
       if (fraudStatus == "challenge") {
         // DO set transaction status on your databaase to 'challenge'
       } else if (fraudStatus == "accept") {
-        const result = await db.query("UPDATE transactions set status = 'PAID' WHERE id = $1 RETURNING *");
+        const result = await db.query("UPDATE transactions set payment_status = 'PAID' WHERE id = $1 RETURNING *", [orderId]);
         return {
           data: result.rows[0],
         };
       }
     } else if (transactionStatus == "settlement") {
-      const result = await db.query("UPDATE transactions set status = 'PAID' WHERE id = $1 RETURNING *");
+      const result = await db.query("UPDATE transactions set status = 'PAID' WHERE id = $1 RETURNING *", [orderId]);
       return {
         data: result.rows[0],
       };
@@ -79,4 +116,4 @@ const confirmPayment = async (body) => {
   }
 };
 
-module.exports = { postTransaction, getUserTicket, confirmPayment };
+module.exports = { postTransaction, getUserTicket, confirmPayment, getUserHistory, getAllHistory };

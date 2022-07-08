@@ -211,7 +211,7 @@ const signIn = async (req, res) => {
     }
 
     //Is account activated?
-    if (!activated_at !== null) {
+    if (!activated_at) {
       return errorResponse(res, 400, { msg: "Please check your email to activate your account" });
     }
 
