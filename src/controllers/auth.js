@@ -221,7 +221,7 @@ const signIn = async (req, res) => {
     }
 
     //Is account activated?
-    if(!activated_at !== null){
+    if(!activated_at){
       return errorResponse(res, 400, { msg: "Please check your email to activate your account"})
     }
 
@@ -239,7 +239,7 @@ const signIn = async (req, res) => {
     await client.set(`jwt${id}`, token);
     successResponse(res, 200, { email, token, role }, null);
   } catch (error) {
-    console.log(err);
+    // console.log(error);
     errorResponse(res, 500, error.message);
   }
 };
