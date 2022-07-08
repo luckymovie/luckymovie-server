@@ -54,6 +54,27 @@ const checkToken = (req, res, next) => {
     });
 };
 
+const checkActivationToken = (req, res, next) => {
+    const {token} = req.params;
+
+    
+    if(!token){
+        return errorResponse(res, 401, {msg: "Please make new activation request"});
+    }
+    //Token Verification
+    jwt.verify(token, process.env.JWT_KEY, {issuer: process.env.JWT_ISSUER}, (err, payload) => {
+        if(err && err.name === "TokenExpiredError"){
+            return errorResponse(res, 401, {msg: "The link has expired. Please make a new request."});
+        }
+        if(err){
+            return errorResponse(res, 401, {msg: "Access denied"});
+        }
+        req.userActivation = payload;
+        
+        next();
+    });
+}; 
+
 module.exports = {
-    checkResetToken, checkToken
+    checkResetToken, checkToken, checkActivationToken
 };
