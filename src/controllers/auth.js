@@ -80,7 +80,7 @@ const register = (req, res) => {
 const activation = (req, res) => {
   const {id, email} = req.userActivation
   activateAccount(id)
-  .then(({message, data}) => {
+  .then(async({message, data}) => {
     const transporter = nodemailer.createTransport({
       service: process.env.SERVICE,
       auth: {
