@@ -1,9 +1,5 @@
 const { successResponse, errorResponse } = require("../helpers/response");
-const {
-  registerNewUSer,
-  getPassword,
-  updatePassword,
-} = require("../models/auth");
+const { registerNewUSer, getPassword, updatePassword } = require("../models/auth");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
@@ -11,8 +7,7 @@ const handlebars = require("handlebars");
 const fs = require("fs");
 const { promisify } = require("util");
 const readFile = promisify(fs.readFile);
-const {client} = require('../config/redis')
-
+const { client } = require("../config/redis");
 
 const register = (req, res) => {
   const { email, password } = req.body;
@@ -21,12 +16,7 @@ const register = (req, res) => {
     .then((hashedPassword) => {
       registerNewUSer(email, hashedPassword)
         .then(() => {
-          successResponse(
-            res,
-            201,
-            { msg: "User successfully registered" },
-            null
-          );
+          successResponse(res, 201, { msg: "User successfully registered" }, null);
         })
         .catch((err) => {
           const { status, error } = err;
@@ -101,7 +91,7 @@ const signIn = async (req, res) => {
     await client.set(`jwt${id}`, token);
     successResponse(res, 200, { email, token, role }, null);
   } catch (error) {
-    console.log(err);
+    // console.log(err);
     errorResponse(res, 500, error.message);
   }
 };
@@ -133,10 +123,7 @@ const forgotPassword = async (req, res) => {
       },
     });
 
-    let html = await readFile(
-      "./src/controllers/templates/forgot.html",
-      "utf8"
-    );
+    let html = await readFile("./src/controllers/templates/forgot.html", "utf8");
     let template = handlebars.compile(html);
     let data = {
       url: `${process.env.BASE_URL}/reset/${token}`,
@@ -181,10 +168,7 @@ const resetPassword = (req, res) => {
             },
           });
 
-          let html = await readFile(
-            "./src/controllers/templates/reset.html",
-            "utf8"
-          );
+          let html = await readFile("./src/controllers/templates/reset.html", "utf8");
           let template = handlebars.compile(html);
           let htmlToSend = template();
 
@@ -207,15 +191,15 @@ const resetPassword = (req, res) => {
 };
 
 const signOut = async (req, res) => {
-    try {
-      const cachedLogin = await client.get(`jwt${req.userPayload.id}`);
-      if (cachedLogin) {
-        await client.del(`jwt${req.userPayload.id}`);
-      }
-      successResponse(res, 200, { message: "You have successfully logged out" }, null);
-    } catch (err) {
-      errorResponse(res, 500, err.message);
+  try {
+    const cachedLogin = await client.get(`jwt${req.userPayload.id}`);
+    if (cachedLogin) {
+      await client.del(`jwt${req.userPayload.id}`);
     }
-  };
-  
-module.exports = { register, signIn, forgotPassword, resetPassword,signOut};
+    successResponse(res, 200, { message: "You have successfully logged out" }, null);
+  } catch (err) {
+    errorResponse(res, 500, err.message);
+  }
+};
+
+module.exports = { register, signIn, forgotPassword, resetPassword, signOut };
