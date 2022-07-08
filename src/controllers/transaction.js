@@ -70,7 +70,7 @@ const userHistory = async (req, res) => {
   }
 };
 
-const allHistory = async (req, res) => {
+const allHistory = async (_req, res) => {
   try {
     const { data } = await getAllHistory();
     res.status(200).json({

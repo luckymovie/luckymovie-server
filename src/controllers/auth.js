@@ -229,7 +229,7 @@ const signIn = async (req, res) => {
     await client.set(`jwt${id}`, token);
     successResponse(res, 200, { email, token, role }, null);
   } catch (error) {
-    // console.log(err);
+    // console.log(error);
     errorResponse(res, 500, error.message);
   }
 };
