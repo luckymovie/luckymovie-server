@@ -1,10 +1,12 @@
 const { getMovieCinema, getCinemaSeat, postCinema } = require("../models/cinemas");
+const groupWithCinema = require("../helpers/groupWithCinema");
 
 const showMovieCinema = async (req, res) => {
   try {
     const { data } = await getMovieCinema(req.query);
+    const group = groupWithCinema(data, "name");
     res.status(200).json({
-      data,
+      data: Object.entries(group),
     });
   } catch (error) {
     const status = error.status || 500;
