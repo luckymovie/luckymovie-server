@@ -14,7 +14,7 @@ Router.post("/activate/:token", tokenValidation.checkActivationToken, authContro
 Router.post("/resend", authValidation.checkResendForm, authValidation.checkActiveEmail, authController.resend);
 
 // //Sign In
-Router.post("/", authValidation.checkSigInForm, authController.signIn);
+Router.post("/", authValidation.checkSigInForm, authValidation.checkEmail, authController.signIn);
 
 // //Sign Out
 Router.delete("/signout",tokenValidation.checkToken, authController.signOut);
