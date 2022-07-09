@@ -5,8 +5,12 @@ const showMovieCinema = async (req, res) => {
   try {
     const { data } = await getMovieCinema(req.query);
     const group = groupWithCinema(data, "name");
+    const cinema = Object.entries(group).map((name) => {
+      return { name: name[0], detail: name[1] };
+    });
+
     res.status(200).json({
-      data: Object.entries(group),
+      data: cinema,
     });
   } catch (error) {
     const status = error.status || 500;
