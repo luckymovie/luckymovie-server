@@ -93,6 +93,24 @@ const checkEmail = (req, res, next) => {
     });
 };
 
+const checkActiveEmail = (req, res, next) => {
+    getEmail(req.body.email)
+    .then((result) => {
+        if(result.rowCount === 0){
+            return errorResponse(res, 400, {msg: "Email is not registered"});
+        }
+        if(result.rows[0].activated_at){
+            return errorResponse(res, 400, {msg: "Email is already activated"});
+        }
+        console.log(result)
+        req.id = result.rows[0].id
+        next();
+    })
+    .catch((error) => {
+        const {status, err} = error;
+        errorResponse(res, status, err);
+    });
+};
 
 const reset = [
     body("newPassword")
@@ -113,6 +131,23 @@ const checkResetForm = [
     },
 ];
  
+const resend = [
+    body("email")
+        .isEmail()
+        .withMessage("Please enter a valid email address")
+        .normalizeEmail()
+];
+
+const checkResendForm = [
+    resend,
+    (req, res, next) => {
+      const error = validationResult(req);
+      if (!error.isEmpty()) {
+        return errorResponse(res, 400, {msg: error.array()})
+      }
+      next();
+    },
+];
 module.exports = {
-    checkRegistedEmail, checkRegisterForm, checkSigInForm, checkForgotForm, checkEmail, checkResetForm
+    checkRegistedEmail, checkRegisterForm, checkSigInForm, checkForgotForm, checkEmail, checkActiveEmail, checkResetForm, checkResendForm
 };
