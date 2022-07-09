@@ -22,7 +22,7 @@ const getMovieCinema = async (query) => {
             params.push(location);
             break;
           case "cinema_date":
-            filterQuery.push(" date = $" + (params.length + 1), " AND");
+            filterQuery.push(" date = TO_DATE($" + (params.length + 1) + ",'DD/MM/YYYY')", " AND");
             params.push(cinema_date);
             break;
           default:
