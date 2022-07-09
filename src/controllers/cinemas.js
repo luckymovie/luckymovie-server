@@ -1,4 +1,4 @@
-const { getMovieCinema, getCinemaSeat } = require("../models/cinemas");
+const { getMovieCinema, getCinemaSeat, postCinema } = require("../models/cinemas");
 
 const showMovieCinema = async (req, res) => {
   try {
@@ -28,4 +28,19 @@ const showCinemaSeat = async (req, res) => {
   }
 };
 
-module.exports = { showMovieCinema, showCinemaSeat };
+const createCinema = async (req, res) => {
+  try {
+    const { data, message } = await postCinema(req.body);
+    res.status(200).json({
+      data,
+      message,
+    });
+  } catch (error) {
+    const status = error.status || 500;
+    res.status(status).json({
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { showMovieCinema, showCinemaSeat, createCinema };

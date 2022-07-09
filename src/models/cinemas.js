@@ -1,6 +1,30 @@
 const { db } = require("../config/db");
 const { ErrorHandler } = require("../middlewares/errorHandler");
 
+const postCinema = async (body) => {
+  const { movie_id, cinema_price, cinema_name, times, location_id, date } = body;
+  try {
+    let cQueryParams = [];
+    let cParams = [];
+    let cinemaQuery = "INSERT INTO cinemas(movies_id,price,name,times_id,location_id,date) values";
+    times.map((time) => {
+      cQueryParams.push(`($${cParams.length + 1},$${cParams.length + 2},$${cParams.length + 3},$${cParams.length + 4},$${cParams.length + 5},$${cParams.length + 6})`, ",");
+      cParams.push(movie_id, cinema_price, cinema_name, time, location_id, date);
+    });
+    cQueryParams.pop();
+    cinemaQuery += cQueryParams.join("");
+    cinemaQuery += " RETURNING *";
+    const cinema = await db.query(cinemaQuery, cParams);
+    return {
+      data: cinema.rows[0],
+      message: "Cinema successfully added",
+    };
+  } catch (error) {
+    const status = error.status || 500;
+    throw new ErrorHandler({ status, message: error.message });
+  }
+};
+
 const getMovieCinema = async (query) => {
   try {
     const { location, cinema_date, movie_id } = query;
@@ -8,7 +32,7 @@ const getMovieCinema = async (query) => {
     const queryProperty = Object.keys(query);
     let filterQuery = [];
     let params = [movie_id];
-    let sqlQuery = "select c.id,c.price as price,name,city,address,time,date from cinemas c join times t on t.id = c.times_id join location l on l.id = c.location_id  where c.movies_id = $1 ";
+    let sqlQuery = "select c.id,c.price as price,name,city,address,time,date from cinemas c join times t on t.id = c.times_id join location l on l.id = c.location_id where c.movies_id = $1 ";
 
     const queryList = ["location", "cinema_date"];
     const queryFilter = queryProperty.filter((val) => queryList.includes(val));
@@ -22,7 +46,7 @@ const getMovieCinema = async (query) => {
             params.push(location);
             break;
           case "cinema_date":
-            filterQuery.push(" date = TO_DATE($" + (params.length + 1) + ",'DD/MM/YYYY')", " AND");
+            filterQuery.push(" date = $" + (params.length + 1), " AND");
             params.push(cinema_date);
             break;
           default:
@@ -62,4 +86,4 @@ const getCinemaSeat = async (query) => {
   }
 };
 
-module.exports = { getMovieCinema, getCinemaSeat };
+module.exports = { getMovieCinema, getCinemaSeat, postCinema };
