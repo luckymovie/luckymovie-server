@@ -1,5 +1,8 @@
 const multer = require("multer");
 const { storage } = require("../config/cloudinary");
+const path = require('path');
+const { errorResponse } = require("../helpers/response");
+
 
 // const imageStore = multer.diskStorage({
 //   destination: (req, _file, cb) => {
@@ -20,36 +23,36 @@ const limitSize = {
   fileSize: 2e6,
 };
 
-// const imageFilter = async (req, file, cb) => {
-//   try {
-//     const extName = path.extname(file.originalname);
-//     const allowedExt = /jpg|png|jpeg|JPG|PNG|JPEG/;
-//     const route = req.baseUrl;
-//     const { params } = req;
-//     const paramsLen = Object.keys(params).length;
-//     if (paramsLen && route === "/product") await getProductById(req.params.id);
-//     if (paramsLen && route === "/promo") await getPromoById(req.params.id);
+const imageFilter = async (req, file, cb) => {
+  try {
+    const extName = path.extname(file.originalname);
+    const allowedExt = /jpg|png|jpeg|JPG|PNG|JPEG/;
 
-//     if (!extName.match(allowedExt)) return cb(new Error("Invalid image extension (jpg,jpeg,png)"), false);
-//     cb(null, true);
-//   } catch (err) {
-//     const { message } = err;
-//     return cb(new Error(message), false);
-//   }
-// };
+    if (!extName.match(allowedExt)){
+      req.fileValidationError = true
+      return cb(new Error("Invalid image extension (jpg,jpeg,png)"), false);
+    }
+    cb(null, true);
+  } catch (err) {
+    const { message } = err;
+    return cb(new Error(message), false);
+  }
+};
 
 const imageUpload = multer({
   storage: storage,
   limits: limitSize,
+  fileFilter: imageFilter
 }).single("photo");
 
 const uploadFile = (req, res, next) => {
   imageUpload(req, res, (err) => {
     if (err) {
-      let status = 400;
-      if (err.message.includes("Not Found")) status = 404;
-      next({ status, message: err.message });
-      return;
+      // let status = 400;
+      // if (err.message.includes("Not Found")) status = 404;
+      // next({ status, message: err.message });
+      // return;
+      return errorResponse(res, 404, {msg: err.message})
     }
     next();
   });
