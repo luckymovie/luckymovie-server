@@ -1,8 +1,7 @@
 const multer = require("multer");
 const { storage } = require("../config/cloudinary");
-const path = require('path');
+const path = require("path");
 const { errorResponse } = require("../helpers/response");
-
 
 // const imageStore = multer.diskStorage({
 //   destination: (req, _file, cb) => {
@@ -26,10 +25,10 @@ const limitSize = {
 const imageFilter = async (req, file, cb) => {
   try {
     const extName = path.extname(file.originalname);
-    const allowedExt = /jpg|png|jpeg|JPG|PNG|JPEG/;
+    const allowedExt = /pdf|jpg|png|jpeg|JPG|PNG|JPEG|PDF/;
 
-    if (!extName.match(allowedExt)){
-      req.fileValidationError = true
+    if (!extName.match(allowedExt)) {
+      req.fileValidationError = true;
       return cb(new Error("Invalid image extension (jpg,jpeg,png)"), false);
     }
     cb(null, true);
@@ -42,7 +41,7 @@ const imageFilter = async (req, file, cb) => {
 const imageUpload = multer({
   storage: storage,
   limits: limitSize,
-  fileFilter: imageFilter
+  fileFilter: imageFilter,
 }).single("photo");
 
 const uploadFile = (req, res, next) => {
@@ -52,7 +51,7 @@ const uploadFile = (req, res, next) => {
       // if (err.message.includes("Not Found")) status = 404;
       // next({ status, message: err.message });
       // return;
-      return errorResponse(res, 404, {msg: err.message})
+      return errorResponse(res, 404, { msg: err.message });
     }
     next();
   });
