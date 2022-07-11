@@ -445,11 +445,11 @@ const exportTransaction = async (req, res) => {
 
     await page.pdf({
       format: "A3",
-      path: `./public/pdf/ticket${seat[0].id}.pdf`,
+      path: `./public/pdf/ticket${trans_id}.pdf`,
       printBackground: true,
     });
     res.status(200).json({
-      url: `http://localhost:5000/export/generate/pdf/transaction-${trans_id}`,
+      url: `https://luckymovie-api.herokuapp.com/export/generate/pdf/transaction-${trans_id}`,
     });
     await browser.close();
   } catch (error) {
