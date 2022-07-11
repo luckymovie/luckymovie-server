@@ -38,7 +38,7 @@ const postTransaction = async (body, userId) => {
 const getUserTicket = async (userId, transaction_id) => {
   try {
     const sqlQuery =
-      "select t.id as transaction_id , t2.seat as seat,title as movie,date as movie_date,time as movie_time,quantity as count, total_price,t2.id as ticket_id from transactions t join screening s on s.id = t.screening_id join movies m on s.movie_id=m.id join cinemas c on s.cinema_id=c.id join tickets t2 on t2.transaction_id =t.id where user_id = $1 and transaction_id = $2 and status = 'PAID'";
+      "select t.id as transaction_id , t2.seat as seat,title as movie,t.date as movie_date,time as movie_time,quantity as count, total_price,t2.id as ticket_id from transactions t join screening s on s.id = t.screening_id join movies m on s.movie_id=m.id join cinemas c on s.cinema_id=c.id join tickets t2 on t2.transaction_id =t.id where user_id = $1 and transaction_id = $2 and payment_status = 'PAID'";
     const result = await db.query(sqlQuery, [userId, transaction_id]);
     return {
       data: result.rows,
@@ -52,7 +52,7 @@ const getUserTicket = async (userId, transaction_id) => {
 const getUserHistory = async (userId) => {
   try {
     const sqlQuery =
-      "select t.id as transaction_id , c.name as cinema, t2.seat as seat,title as movie,date as movie_date,time as movie_time,quantity as count, total_price,t2.id as ticket_id,ticket_status from transactions t join screening s on s.id = t.screening_id join movies m on s.movie_id=m.id join cinemas c on s.cinema_id=c.id join tickets t2 on t2.transaction_id =t.id where user_id = $1 and payment_status = 'PAID'";
+      "select t.id as transaction_id , c.name as cinema, t2.seat as seat,title as movie,c.date as movie_date,time as movie_time,quantity as count, total_price,t2.id as ticket_id,ticket_status from transactions t join screening s on s.id = t.screening_id join movies m on s.movie_id=m.id join cinemas c on s.cinema_id=c.id join tickets t2 on t2.transaction_id =t.id where user_id = $1 and payment_status = 'PAID'";
     const result = await db.query(sqlQuery, [userId]);
     return {
       data: result.rows,
@@ -66,7 +66,7 @@ const getUserHistory = async (userId) => {
 const getAllHistory = async () => {
   try {
     const sqlQuery =
-      "select distinct on(t.id) t2.transaction_id,t.user_id as user_id, c.name as cinema, t2.seat as seat,title as movie,date as movie_date,time as movie_time,t.payment_status,payment_method,quantity as count, total_price,t2.id as ticket_id,ticket_status from transactions t join screening s on s.id = t.screening_id join movies m on s.movie_id=m.id join cinemas c on s.cinema_id=c.id join tickets t2 on t2.transaction_id =t.id ";
+      "select distinct on(t.id) t2.transaction_id,t.user_id as user_id, c.name as cinema, t2.seat as seat,title as movie,c.date as movie_date,time as movie_time,t.payment_status,payment_method,quantity as count, total_price,t2.id as ticket_id,ticket_status from transactions t join screening s on s.id = t.screening_id join movies m on s.movie_id=m.id join cinemas c on s.cinema_id=c.id join tickets t2 on t2.transaction_id =t.id ";
     const result = await db.query(sqlQuery);
     return {
       data: result.rows,
