@@ -1,5 +1,6 @@
 const { createPayment } = require("../config/midtrans");
 const { postTransaction, getUserTicket, confirmPayment, getUserHistory, getAllHistory } = require("../models/transaction");
+const groupWithCinema = require("../helpers/groupWithCinema");
 const axios = require("axios").default;
 
 let order_id;
@@ -26,8 +27,12 @@ const showUserTicket = async (req, res) => {
   try {
     const { trans_id } = req.params;
     const { data } = await getUserTicket(req.userPayload.id, trans_id);
+    const group = groupWithCinema(data, "seat");
+    const seat = Object.entries(group).map((item) => {
+      return { seat: item[0], detail: item[1] };
+    });
     res.status(200).json({
-      data,
+      data: seat,
     });
   } catch (error) {
     const status = error.status || 500;
@@ -59,8 +64,12 @@ const userHistory = async (req, res) => {
   try {
     const userId = req.userPayload.id;
     const { data } = await getUserHistory(userId);
+    const group = groupWithCinema(data, "transaction_id");
+    const detail = Object.entries(group).map((item) => {
+      return { id: item[0], detail: item[1] };
+    });
     res.status(200).json({
-      data,
+      data: detail,
     });
   } catch (error) {
     const status = error.status || 500;
