@@ -1,5 +1,5 @@
 const Router = require("express").Router();
-const { createTransaction, showUserTicket, userHistory, allHistory } = require("../controllers/transaction");
+const { createTransaction, showUserTicket, userHistory, allHistory, exportTransaction, generatePdf } = require("../controllers/transaction");
 const { checkToken } = require("../middlewares/tokenValidations");
 const { confirmPayment } = require("../models/transaction");
 
