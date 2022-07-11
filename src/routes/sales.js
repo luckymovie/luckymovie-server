@@ -3,10 +3,8 @@ const Router = express.Router();
 const authController = require("../controllers/sales");
 const tokenValidation = require("../middlewares/tokenValidations");
 
-//Weekly sales
-Router.get("/weekly", tokenValidation.checkToken, authController.weeklySales);
+//Get sales
+Router.get("/", tokenValidation.checkToken, authController.getSales);
 
-//Monthly sales
-Router.get("/monthly", tokenValidation.checkToken, authController.monthlySales);
 
 module.exports = Router;
