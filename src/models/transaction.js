@@ -93,15 +93,15 @@ const confirmPayment = async (response) => {
         // DO set transaction status on your databaase to 'challenge'
       } else if (fraudStatus == "accept") {
         const result = await db.query("UPDATE transactions set payment_status = 'PAID', WHERE id = $1 RETURNING *", [orderId]);
-        const userId = result.rows[0].user_id;
+        const userId = result.rows.length && result.rows[0].user_id;
         const update = await db.query("UPDATE users set loyalty_points = loyalty_points +10 where id = $1", [userId]);
         return {
           data: update.rows[0],
         };
       }
     } else if (transactionStatus == "settlement") {
-      const result = await db.query("UPDATE transactions set payment_status = 'PAID',ticket_status='active' WHERE id = $1 RETURNING *", [orderId]);
-      const userId = result.rows[0].user_id;
+      const result = await db.query("UPDATE transactions set payment_status = 'PAID' WHERE id = $1 RETURNING *", [orderId]);
+      const userId = result.rows.length && result.rows[0].user_id;
       const update = await db.query("UPDATE users set loyalty_points = loyalty_points +10 where id = $1", [userId]);
       return {
         data: update.rows[0],
