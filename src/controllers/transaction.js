@@ -27,9 +27,9 @@ const showUserTicket = async (req, res) => {
   try {
     const { trans_id } = req.params;
     const { data } = await getUserTicket(req.userPayload.id, trans_id);
-    const group = groupWithCinema(data, "seat");
+    const group = groupWithCinema(data, "transaction_id");
     const seat = Object.entries(group).map((item) => {
-      return { seat: item[0], detail: item[1] };
+      return { id: item[0], detail: item[1] };
     });
     res.status(200).json({
       data: seat,
