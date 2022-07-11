@@ -3,6 +3,7 @@ const fs = require("fs");
 const contentDisposition = require("content-disposition");
 const currencyFormatter = require("../helpers/formatter");
 const { getUserTicket } = require("../models/transaction");
+const groupWithCinema = require("../helpers/groupWithCinema");
 
 const exportTransaction = async (req, res) => {
   try {
@@ -447,7 +448,7 @@ const exportTransaction = async (req, res) => {
       printBackground: true,
     });
     res.status(200).json({
-      url: `https://luckymovie-api.herokuapp.com/transaction/generate/pdf/transaction-${trans_id}`,
+      url: `http://localhost:5000/export/generate/pdf/transaction-${trans_id}`,
     });
     await browser.close();
   } catch (error) {

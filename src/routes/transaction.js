@@ -8,7 +8,5 @@ Router.get("/", checkToken, allHistory);
 Router.get("/history", checkToken, userHistory);
 Router.get("/ticket/:trans_id", checkToken, showUserTicket);
 Router.post("/midtrans-notification", confirmPayment);
-Router.get("/export/:trans_id", checkToken, exportTransaction);
-Router.get("/generate/pdf/:trans_id", generatePdf);
 
 module.exports = Router;
