@@ -4,6 +4,7 @@ const movieRouter = require("./movies");
 const userRouter = require("./user");
 const transactionRouter = require("./transaction");
 const cinemaRouter = require("../routes/cinema");
+const salesRouter = require("../routes/sales");
 
 Router.get("/", (_req, res) => {
   res.json({
@@ -20,6 +21,8 @@ Router.use("/movies", movieRouter);
 Router.use("/cinema", cinemaRouter);
 
 Router.use("/transaction", transactionRouter);
+
+Router.use("/sales", salesRouter);
 
 Router.get("*", (_req, res) => {
   res.status(404).json({
