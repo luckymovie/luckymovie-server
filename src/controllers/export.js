@@ -449,7 +449,7 @@ const exportTransaction = async (req, res) => {
       printBackground: true,
     });
     res.status(200).json({
-      url: `http://localhost:5000/export/download/pdf/transaction-${trans_id}`,
+      url: `https://luckymovie-api.herokuapp.com/export/download/pdf/transaction-${trans_id}`,
     });
     await browser.close();
   } catch (error) {
@@ -904,7 +904,7 @@ const printTransaction = async (req, res) => {
       printBackground: true,
     });
     res.status(200).json({
-      url: `http://localhost:5000/export/print/pdf/transaction-${trans_id}`,
+      url: `https://luckymovie-api.herokuapp.com/export/print/pdf/transaction-${trans_id}`,
     });
     await browser.close();
   } catch (error) {
