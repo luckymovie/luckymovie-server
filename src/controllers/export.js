@@ -163,6 +163,16 @@ const exportTransaction = async (req, res) => {
               align-items: center;
               /* padding: 20px 0px; */
             }
+            .imgFilterBarcode{
+              width:100%;
+              height:200%;
+              object-fit: scale-down;
+            }
+            .imgFilterLogo{
+              width:100%;
+              height:60%;
+              object-fit: scale-down;
+            }
             .righthead {
               flex: 1;
               display: flex;
@@ -376,10 +386,10 @@ const exportTransaction = async (req, res) => {
             <div class="title">Proof of Payment</div>
             <div class="ticket">
               <div class="tickethead">
-                <div class="lefthead"> <img src="data:image/jpeg;base64,${fs.readFileSync("./public/img/tickitz.png").toString("base64")}" alt="alt text" /></div>
+                <div class="lefthead"> <img class="imgFilterLogo" src="data:image/jpeg;base64,${fs.readFileSync("./public/img/tickitz.png").toString("base64")}" alt="alt text" /></div>
                 <div class="midhead">${req.userPayload.email}</div>
                 <div class="righthead">
-                <img src="data:image/jpeg;base64,${fs.readFileSync("./public/img/tickitz.png").toString("base64")}" alt="alt text" />
+                <img class="imgFilterLogo" src="data:image/jpeg;base64,${fs.readFileSync("./public/img/tickitz.png").toString("base64")}" alt="alt text" />
                   <div class="round1"></div>
                 </div>
               </div>
@@ -429,7 +439,7 @@ const exportTransaction = async (req, res) => {
            
       
                 <div class="barcode">
-                <img src="data:image/jpeg;base64,${fs.readFileSync("./public/img/qrc.png").toString("base64")}" alt="alt text" />
+                <img class="imgFilterBarcode" src="data:image/jpeg;base64,${fs.readFileSync("./public/img/qrc.png").toString("base64")}" alt="alt text" />
                   <div class="round2"></div>
                 </div>
               </div>
@@ -449,7 +459,7 @@ const exportTransaction = async (req, res) => {
       printBackground: true,
     });
     res.status(200).json({
-      url: `https://luckymovie-api.herokuapp.com/export/download/pdf/transaction-${trans_id}`,
+      url: `http://localhost:5000/export/download/pdf/transaction-${trans_id}`,
     });
     await browser.close();
   } catch (error) {
@@ -720,7 +730,16 @@ const printTransaction = async (req, res) => {
               background-color: rgb(92, 92, 92);
               color: white;
             }
-      
+            .imgFilterBarcode{
+              width:100%;
+              height:200%;
+              object-fit: scale-down;
+            }
+            .imgFilterLogo{
+              width:100%;
+              height:60%;
+              object-fit: scale-down;
+            }
             .button:active {
               background-color: rgb(0, 0, 0);
               color: white;
@@ -831,10 +850,10 @@ const printTransaction = async (req, res) => {
             <div class="title">Proof of Payment</div>
             <div class="ticket">
               <div class="tickethead">
-                <div class="lefthead"> <img src="data:image/jpeg;base64,${fs.readFileSync("./public/img/tickitz.png").toString("base64")}" alt="alt text" /></div>
+                <div class="lefthead"> <img class="imgFilterLogo" src="data:image/jpeg;base64,${fs.readFileSync("./public/img/tickitz.png").toString("base64")}" alt="alt text" /></div>
                 <div class="midhead">${req.userPayload.email}</div>
                 <div class="righthead">
-                <img src="data:image/jpeg;base64,${fs.readFileSync("./public/img/tickitz.png").toString("base64")}" alt="alt text" />
+                <img class="imgFilterLogo" src="data:image/jpeg;base64,${fs.readFileSync("./public/img/tickitz.png").toString("base64")}" alt="alt text" />
                   <div class="round1"></div>
                 </div>
               </div>
@@ -884,7 +903,7 @@ const printTransaction = async (req, res) => {
            
       
                 <div class="barcode">
-                <img src="data:image/jpeg;base64,${fs.readFileSync("./public/img/qrc.png").toString("base64")}" alt="alt text" />
+                <img class="imgFilterBarcode" src="data:image/jpeg;base64,${fs.readFileSync("./public/img/qrc.png").toString("base64")}" alt="alt text" />
                   <div class="round2"></div>
                 </div>
               </div>
@@ -904,7 +923,7 @@ const printTransaction = async (req, res) => {
       printBackground: true,
     });
     res.status(200).json({
-      url: `https://luckymovie-api.herokuapp.com/export/print/pdf/transaction-${trans_id}`,
+      url: `http://localhost:5000/export/print/pdf/transaction-${trans_id}`,
     });
     await browser.close();
   } catch (error) {
