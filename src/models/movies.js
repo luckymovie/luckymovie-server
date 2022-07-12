@@ -16,6 +16,22 @@ const postMovie = async (body, image) => {
   }
 };
 
+const patchMovie = async (body, image, id) => {
+  const { title, genre, duration, casts, synopsis, director, release_date } = body;
+  try {
+    const movieQuery =
+      "UPDATE movies SET title = COALESCE(NULLIF($1, ''), title), genre = COALESCE(NULLIF($2, ''), genre), duration = COALESCE(NULLIF($3, ''), duration), casts = COALESCE(NULLIF($4, ''), casts), synopsis = COALESCE(NULLIF($5, ''), synopsis),director = COALESCE(NULLIF($6, ''), director),release_date = COALESCE(NULLIF($7, '')::date, release_date),image = COALESCE(NULLIF($8, ''), image), updated_at = now() WHERE id = $9 RETURNING *";
+    const movie = await db.query(movieQuery, [title, genre, duration, casts, synopsis, director, release_date, image, id]);
+    const movieId = movie.rows[0];
+    return {
+      data: movieId,
+      message: "Movie successfully updated",
+    };
+  } catch (error) {
+    throw new ErrorHandler({ status: error.status || 500, message: error.message });
+  }
+};
+
 const getMovieNow = async () => {
   try {
     const sqlQuery =
@@ -70,4 +86,4 @@ const getMovieDetail = async (id) => {
   }
 };
 
-module.exports = { postMovie, getMovieNow, getMovieUpcoming, getMovieDetail };
+module.exports = { postMovie, getMovieNow, getMovieUpcoming, getMovieDetail, patchMovie };
