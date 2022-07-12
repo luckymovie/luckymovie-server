@@ -1,4 +1,4 @@
-const { postMovie, getMovieNow, getMovieUpcoming, getMovieDetail, getMovieCinema } = require("../models/movies");
+const { postMovie, getMovieNow, getMovieUpcoming, getMovieDetail, patchMovie } = require("../models/movies");
 
 const createMovie = async (req, res) => {
   try {
@@ -21,6 +21,30 @@ const createMovie = async (req, res) => {
     });
   }
 };
+
+const editMovie = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { file } = req;
+    let image = "";
+
+    if (file) {
+      image = file.path;
+    }
+
+    const { data, message } = await patchMovie(req.body, image, id);
+    res.status(200).json({
+      data,
+      message,
+    });
+  } catch (error) {
+    const status = error.status || 500;
+    res.status(status).json({
+      error: error.message,
+    });
+  }
+};
+
 const showMovieNow = async (_req, res) => {
   try {
     const { data } = await getMovieNow();
@@ -62,4 +86,4 @@ const showMovieDetail = async (req, res) => {
   }
 };
 
-module.exports = { createMovie, showMovieNow, showMovieUpcoming, showMovieDetail };
+module.exports = { createMovie, showMovieNow, showMovieUpcoming, showMovieDetail, editMovie };
