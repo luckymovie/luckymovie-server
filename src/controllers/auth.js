@@ -45,7 +45,7 @@ const register = (req, res) => {
             let html = await readFile("./src/controllers/templates/confirmation.html", "utf8");
             let template = handlebars.compile(html);
             let data = {
-              url: `${process.env.CLIENT_URL}confirmation/${token}`,
+              url: `${process.env.CLIENT_URL}/confirmation/${token}`,
             };
             let htmlToSend = template(data);
 
